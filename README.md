@@ -4,6 +4,12 @@ Hướng dẫn để người khác clone/cài/chạy dự án này.
 
 ## Yêu cầu
 - Node.js LTS (khuyên dùng 18+ hoặc 20+)
+  - Tải và cài đặt: [Node.js LTS](https://nodejs.org/en)
+  - Kiểm tra đã cài (PowerShell):
+    ```powershell
+    node -v
+    npm -v
+    ```
 
 ## Cài đặt và chạy
 ```bash
