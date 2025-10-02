@@ -8,7 +8,7 @@ Hướng dẫn để người khác clone/cài/chạy dự án này.
 ## Cài đặt và chạy
 ```bash
 git clone <URL_REPO>
-cd mooc-hoc-vu-so
+cd frontend-vite-demo
 npm install
 npm run dev
 ```
