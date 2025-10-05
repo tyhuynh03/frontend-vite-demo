@@ -1,42 +1,65 @@
-# MOOC Học vụ số — React + TypeScript + Vite + Tailwind CSS
+# MOOC Học Vũ Số - Full Stack Project
 
-Hướng dẫn để người khác clone/cài/chạy dự án này.
+Dự án học tập trực tuyến với cấu trúc monorepo gồm frontend và backend.
 
-## Yêu cầu
-- Node.js LTS (khuyên dùng 18+ hoặc 20+)
-  - Tải và cài đặt: [Node.js LTS](https://nodejs.org/en)
-  - Kiểm tra đã cài (PowerShell):
-    ```powershell
-    node -v
-    npm -v
-    ```
+## 📁 Cấu trúc dự án
 
-## Cài đặt và chạy
+```
+mooc-hoc-vu-so/
+├── frontend/          # React + Vite + TypeScript
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── ...
+├── backend/           # Backend API (sẽ được phát triển)
+└── README.md
+```
+
+## 🚀 Cách chạy dự án
+
+### Frontend (React + Vite)
 ```bash
-git clone <URL_REPO>
-cd frontend-vite-demo
+cd frontend
 npm install
 npm run dev
 ```
-Mở trình duyệt tới `http://localhost:5173`.
 
-## Chạy trên mạng LAN (tuỳ chọn)
+### Backend (sẽ được thêm sau)
 ```bash
-npm run dev -- --host 0.0.0.0 --port 5173
+cd backend
+# Cài đặt và chạy backend
 ```
-Sau đó truy cập từ thiết bị khác: `http://IP_MAY_CHU:5173` (ví dụ `http://192.168.1.23:5173`). Nếu cổng bận, đổi `--port`.
 
-## Build production
-```bash
-npm run build
-npm run preview
-```
-Xem bản build tại `http://localhost:4173`.
+## 🛠️ Công nghệ sử dụng
 
-## Cấu trúc chính
-- `src/App.tsx`: giao diện trang chủ (Navbar, Hero, CourseGrid, Footer).
-- `src/index.css`: import Tailwind CSS.
-- `tailwind.config.js` + `postcss.config.js`: cấu hình Tailwind/PostCSS v4.
+### Frontend
+- **React 19** - UI Framework
+- **TypeScript** - Type Safety
+- **Vite** - Build Tool
+- **Tailwind CSS** - Styling
+- **React Router DOM** - Routing
 
-## Ghi chú bản quyền ảnh
-Ảnh minh hoạ dùng từ Unsplash (free). Có thể thay bằng ảnh nội bộ đặt trong `public/` và sửa URL trong `src/App.tsx`.
+### Backend (sẽ được thêm)
+- TBD
+
+## 📝 Scripts
+
+### Frontend
+- `npm run dev` - Chạy development server
+- `npm run build` - Build cho production
+- `npm run preview` - Xem trước bản build
+- `npm run lint` - Kiểm tra lỗi code
+
+## 🔧 Development
+
+1. Clone repository
+2. Cài đặt dependencies cho frontend: `cd frontend && npm install`
+3. Chạy frontend: `npm run dev`
+4. Truy cập `http://localhost:5173`
+
+## 📚 Tính năng
+
+- ✅ Authentication (Login/Register)
+- 🔄 Routing
+- 🎨 Responsive Design
+- 📱 Mobile Friendly
