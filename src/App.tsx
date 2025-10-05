@@ -1,18 +1,22 @@
+import { Link, BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from './components/Login';
+import Register from './components/Register';
+
 function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-        <a className="flex items-center gap-2" href="#">
+        <Link to="/" className="flex items-center gap-2">
           <span className="text-xl font-bold text-slate-900">MOOC Học vụ số</span>
-        </a>
+        </Link>
         <nav className="hidden gap-6 text-sm font-medium text-slate-600 md:flex">
           <a className="hover:text-slate-900" href="#khoa-hoc">Khóa học</a>
           <a className="hover:text-slate-900" href="#lo-trinh">Lộ trình</a>
           <a className="hover:text-slate-900" href="#blog">Blog</a>
         </nav>
         <div className="flex items-center gap-3">
-          <button className="rounded-md border px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Đăng nhập</button>
-          <button className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500">Đăng ký</button>
+          <Link to="/login" className="rounded-md border px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Đăng nhập</Link>
+          <Link to="/register" className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500">Đăng ký</Link>
         </div>
       </div>
     </header>
@@ -142,7 +146,8 @@ function Footer() {
   )
 }
 
-function App() {
+
+function LandingPage() {
   return (
     <div className="min-h-screen bg-white text-slate-800">
       <Navbar />
@@ -150,7 +155,19 @@ function App() {
       <CourseGrid />
       <Footer />
     </div>
-  )
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    </Router>
+  );
 }
 
 export default App
