@@ -1,17 +1,21 @@
-# Backend API
+# Backend API - Django
 
-Thư mục này dành cho backend API của dự án MOOC Học Vũ Số.
+Thư mục này dành cho backend API của dự án MOOC Học Vũ Số sử dụng Django.
 
 ## 🚀 Sẽ được phát triển
 
-- Node.js/Express API
-- Database integration
-- Authentication & Authorization
-- API endpoints cho frontend
+- Django REST Framework API
+- PostgreSQL/MySQL Database
+- Django Authentication & Authorization
+- API endpoints cho frontend React
+- Django Admin Panel
 
 ## 📝 TODO
 
-- [ ] Setup Node.js project
-- [ ] Database configuration
-- [ ] API routes
-- [ ] Authentication system
+- [ ] Setup Django project
+- [ ] Configure database (PostgreSQL/MySQL)
+- [ ] Setup Django REST Framework
+- [ ] Create API models
+- [ ] Implement authentication
+- [ ] Create API endpoints
+- [ ] Setup CORS for frontend
