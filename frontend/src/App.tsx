@@ -1,8 +1,31 @@
+import { useState, useEffect } from 'react';
 import { Link, BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
+import Profile from './components/Profile';
+import UserMenu from './components/UserMenu';
 
 function Navbar() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('access_token');
+      const user = localStorage.getItem('user');
+      setIsLoggedIn(!!(token && user));
+    };
+
+    checkAuth();
+    window.addEventListener('storage', checkAuth);
+    
+    const interval = setInterval(checkAuth, 1000);
+
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+      clearInterval(interval);
+    };
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 border-b bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
@@ -15,8 +38,14 @@ function Navbar() {
           <a className="hover:text-slate-900" href="#blog">Blog</a>
         </nav>
         <div className="flex items-center gap-3">
-          <Link to="/login" className="rounded-md border px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Đăng nhập</Link>
-          <Link to="/register" className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500">Đăng ký</Link>
+          {isLoggedIn ? (
+            <UserMenu />
+          ) : (
+            <>
+              <Link to="/login" className="rounded-md border px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">Đăng nhập</Link>
+              <Link to="/register" className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500">Đăng ký</Link>
+            </>
+          )}
         </div>
       </div>
     </header>
@@ -165,6 +194,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
     </Router>
   );

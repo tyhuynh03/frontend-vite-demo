@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { authAPI } from '../services/api';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -10,13 +11,14 @@ function Register() {
   });
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
-    // Clear error when user starts typing
     if (errors[e.target.name]) {
       setErrors({
         ...errors,
@@ -52,11 +54,49 @@ function Register() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
-      // Xử lý đăng ký ở đây
-      console.log('Register data:', formData);
+    if (!validateForm()) return;
+
+    setLoading(true);
+    
+    try {
+      const response = await authAPI.register({
+        username: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        confirm_password: formData.confirmPassword,
+        role: 'student'
+      });
+      
+      const { user, tokens } = response.data;
+      
+      localStorage.setItem('access_token', tokens.access);
+      localStorage.setItem('refresh_token', tokens.refresh);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      window.dispatchEvent(new Event('storage'));
+      navigate('/');
+    } catch (err: any) {
+      const errorData = err.response?.data;
+      const newErrors: {[key: string]: string} = {};
+      
+      if (errorData?.email) {
+        newErrors.email = Array.isArray(errorData.email) ? errorData.email[0] : errorData.email;
+      }
+      if (errorData?.username) {
+        newErrors.fullName = Array.isArray(errorData.username) ? errorData.username[0] : errorData.username;
+      }
+      if (errorData?.password) {
+        newErrors.password = Array.isArray(errorData.password) ? errorData.password[0] : errorData.password;
+      }
+      if (Object.keys(newErrors).length === 0) {
+        newErrors.general = 'Đăng ký thất bại. Vui lòng thử lại.';
+      }
+      
+      setErrors(newErrors);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,6 +114,12 @@ function Register() {
 
         {/* Form */}
         <div className="bg-white rounded-2xl border shadow-sm p-8">
+          {errors.general && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+              {errors.general}
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-slate-700 mb-2">
@@ -85,7 +131,8 @@ function Register() {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                disabled={loading}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-slate-50 disabled:cursor-not-allowed ${
                   errors.fullName ? 'border-red-300' : 'border-slate-300'
                 }`}
                 placeholder="Nhập họ và tên"
@@ -105,7 +152,8 @@ function Register() {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                disabled={loading}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-slate-50 disabled:cursor-not-allowed ${
                   errors.email ? 'border-red-300' : 'border-slate-300'
                 }`}
                 placeholder="Nhập email của bạn"
@@ -125,7 +173,8 @@ function Register() {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                disabled={loading}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-slate-50 disabled:cursor-not-allowed ${
                   errors.password ? 'border-red-300' : 'border-slate-300'
                 }`}
                 placeholder="Nhập mật khẩu"
@@ -145,7 +194,8 @@ function Register() {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                disabled={loading}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-slate-50 disabled:cursor-not-allowed ${
                   errors.confirmPassword ? 'border-red-300' : 'border-slate-300'
                 }`}
                 placeholder="Nhập lại mật khẩu"
@@ -177,9 +227,10 @@ function Register() {
 
             <button
               type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={loading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed"
             >
-              Đăng ký
+              {loading ? 'Đang đăng ký...' : 'Đăng ký'}
             </button>
           </form>
 

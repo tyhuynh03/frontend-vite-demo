@@ -1,65 +1,110 @@
-# MOOC Học Vũ Số - Full Stack Project
+# MOOC Học Vụ Số - Full Stack Application
 
 Dự án học tập trực tuyến với cấu trúc monorepo gồm frontend và backend.
 
-## 📁 Cấu trúc dự án
+## Tech Stack
 
+**Frontend:** React 19, TypeScript, Vite, TailwindCSS, Axios, React Router  
+**Backend:** Django 4.2, DRF, JWT (simplejwt), PostgreSQL/MySQL/SQLite, CORS
+
+## Tính năng
+
+- User Authentication (Register, Login, Logout)
+- JWT Token Authentication
+- Role-based Access (Student, Teacher, Admin)
+- RESTful API & Admin Panel
+- Modern Responsive UI
+
+## Quick Start
+
+### Backend
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py makemigrations 
+python manage.py migrate
+python manage.py runserver
 ```
-mooc-hoc-vu-so/
-├── frontend/          # React + Vite + TypeScript
-│   ├── src/
-│   ├── public/
-│   ├── package.json
-│   └── ...
-├── backend/           # Backend API (sẽ được phát triển)
-└── README.md
-```
 
-## 🚀 Cách chạy dự án
-
-### Frontend (React + Vite)
+### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-### Backend (sẽ được thêm sau)
-```bash
-cd backend
-# Cài đặt và chạy backend
+**Chi tiết:** [guide_run.md](./guide_run.md)
+
+## Cấu trúc
+
+```
+frontend-vite-demo/
+├── backend/
+│   ├── config/          # Django settings
+│   ├── accounts/        # User app
+│   └── manage.py
+├── frontend/
+│   └── src/
+│       ├── components/  # React components
+│       ├── services/    # API services
+│       ├── types/       # TypeScript types
+│       └── utils/       # Auth utilities
+└── guide_run.md
 ```
 
-## 🛠️ Công nghệ sử dụng
+## API Endpoints
 
-### Frontend
-- **React 19** - UI Framework
-- **TypeScript** - Type Safety
-- **Vite** - Build Tool
-- **Tailwind CSS** - Styling
-- **React Router DOM** - Routing
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/auth/register/` | Đăng ký | No |
+| POST | `/api/auth/login/` | Đăng nhập | No |
+| POST | `/api/auth/logout/` | Đăng xuất | Yes |
+| GET | `/api/auth/profile/` | Thông tin user | Yes |
+| PATCH | `/api/auth/profile/` | Cập nhật user | Yes |
+| POST | `/api/auth/token/refresh/` | Refresh token | No |
 
-### Backend (sẽ được thêm)
-- TBD
+## Database Schema - User Model
 
-## 📝 Scripts
+- `id` - Primary Key
+- `username` - Unique username
+- `email` - Unique email (login field)
+- `password` - Hashed password
+- `role` - student/teacher/admin
+- `created_at`, `updated_at` - Timestamps
 
-### Frontend
-- `npm run dev` - Chạy development server
-- `npm run build` - Build cho production
-- `npm run preview` - Xem trước bản build
-- `npm run lint` - Kiểm tra lỗi code
+## Scripts
 
-## 🔧 Development
+**Backend:**
+```bash
+python manage.py runserver    # Start server
+python manage.py migrate       # Run migrations
+python setup_db.py            # Setup database
+```
 
-1. Clone repository
-2. Cài đặt dependencies cho frontend: `cd frontend && npm install`
-3. Chạy frontend: `npm run dev`
-4. Truy cập `http://localhost:5173`
+**Frontend:**
+```bash
+npm run dev       # Development server
+npm run build     # Build production
+npm run preview   # Preview build
+npm run lint      # Lint code
+```
 
-## 📚 Tính năng
+## Test API
 
-- ✅ Authentication (Login/Register)
-- 🔄 Routing
-- 🎨 Responsive Design
-- 📱 Mobile Friendly
+```bash
+# Register
+curl -X POST http://localhost:8000/api/auth/register/ \
+  -H "Content-Type: application/json" \
+  -d '{"username":"test","email":"test@test.com","password":"test123456","confirm_password":"test123456"}'
+
+# Login
+curl -X POST http://localhost:8000/api/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"test123456"}'
+```
+
+## License
+
+MIT
