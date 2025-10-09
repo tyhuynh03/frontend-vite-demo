@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Link, BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Link, BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
 import Profile from './components/Profile';
 import UserMenu from './components/UserMenu';
+import Courses from './components/Courses';
+import CourseDetail from './components/CourseDetail';
+import AddCourse from './components/AddCourse';
+import EditCourse from './components/EditCourse';
 
 function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -33,9 +37,11 @@ function Navbar() {
           <span className="text-xl font-bold text-slate-900">MOOC Học vụ số</span>
         </Link>
         <nav className="hidden gap-6 text-sm font-medium text-slate-600 md:flex">
-          <a className="hover:text-slate-900" href="#khoa-hoc">Khóa học</a>
-          <a className="hover:text-slate-900" href="#lo-trinh">Lộ trình</a>
-          <a className="hover:text-slate-900" href="#blog">Blog</a>
+          <Link to="/" className="hover:text-slate-900">Trang chủ</Link>
+          <a className="hover:text-slate-900" href="#tin-tuc">Tin tức</a>
+          <Link to="/courses" className="hover:text-slate-900">Khóa học</Link>
+          <a className="hover:text-slate-900" href="#chuong-trinh-hoc">Chương trình học</a>
+          <a className="hover:text-slate-900" href="#giang-vien">Giảng viên</a>
         </nav>
         <div className="flex items-center gap-3">
           {isLoggedIn ? (
@@ -53,15 +59,46 @@ function Navbar() {
 }
 
 function Hero() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/courses?search=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate('/courses');
+    }
+  };
+
   return (
     <section className="border-b bg-gradient-to-b from-white to-slate-50">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-16 md:grid-cols-2 md:py-20">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-5xl">Nền tảng Học vụ số cho kỷ nguyên AI</h1>
-          <p className="mt-4 text-slate-600 md:text-lg">Khóa học chất lượng, lộ trình rõ ràng, theo dõi tiến độ thông minh. Bắt đầu học ngay hôm nay.</p>
+          <p className="mt-4 text-slate-600 md:text-lg">Khóa học chất lượng được cập nhật thường xuyên. Bắt đầu học ngay hôm nay.</p>
           <div className="mt-6 flex items-center gap-3">
-            <a href="#khoa-hoc" className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-500">Khám phá khóa học</a>
-            <a href="#" className="rounded-md border px-4 py-2 text-slate-700 hover:bg-slate-50">Dùng thử miễn phí</a>
+            <Link to="/courses" className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-500">Khám phá khóa học</Link>
+          </div>
+          
+          {/* Search Section */}
+          <div className="mt-8">
+            <p className="text-lg font-medium text-slate-700 mb-3">Hãy tìm kiếm khóa học bạn quan tâm:</p>
+            <form onSubmit={handleSearch} className="flex gap-2">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Nhập từ khóa tìm kiếm..."
+                className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-slate-900 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              />
+              <button
+                type="submit"
+                className="rounded-lg bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                Tìm kiếm
+              </button>
+            </form>
           </div>
         </div>
         <div className="mx-auto w-full max-w-xl md:max-w-2xl">
@@ -78,85 +115,9 @@ function Hero() {
   )
 }
 
-type Course = { id: string; title: string; level: string; tag: string; image: string };
+// Dữ liệu khóa học demo đã được loại bỏ
 
-const sampleCourses: Course[] = [
-  {
-    id: "1",
-    title: "Nhập môn Trí tuệ nhân tạo",
-    level: "Beginner",
-    tag: "AI",
-    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "2",
-    title: "Machine Learning cơ bản",
-    level: "Beginner",
-    tag: "AI",
-    image: "https://images.unsplash.com/photo-1555255707-c07966088b7b?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "3",
-    title: "Phân tích dữ liệu với Python",
-    level: "Beginner",
-    tag: "Data",
-    image: "https://images.unsplash.com/photo-1543286386-713bdd548da4?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "4",
-    title: "Frontend Web với React",
-    level: "Intermediate",
-    tag: "Web",
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "5",
-    title: "Thiết kế hệ thống trên Cloud",
-    level: "Intermediate",
-    tag: "Cloud",
-    image: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=1200&auto=format&fit=crop",
-  },
-  {
-    id: "6",
-    title: "An toàn thông tin căn bản",
-    level: "Beginner",
-    tag: "Security",
-    image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1200&auto=format&fit=crop",
-  },
-];
-
-function CourseGrid() {
-  return (
-    <section id="khoa-hoc" className="bg-white">
-      <div className="mx-auto max-w-7xl px-4 py-12">
-        <div className="flex items-end justify-between">
-          <h2 className="text-2xl font-bold text-slate-900 md:text-3xl">Khóa học nổi bật</h2>
-          <a className="text-sm font-medium text-indigo-600 hover:text-indigo-500" href="#">Xem tất cả</a>
-        </div>
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {sampleCourses.map((c) => (
-            <article key={c.id} className="overflow-hidden rounded-xl border transition hover:shadow-md">
-              <div className="h-40 w-full overflow-hidden bg-slate-100">
-                <img src={c.image} alt={c.title} className="h-full w-full object-cover" />
-              </div>
-              <div className="p-5">
-                <div className="flex items-center justify-between text-xs text-slate-500">
-                <span className="rounded bg-slate-100 px-2 py-0.5 text-slate-700">{c.tag}</span>
-                <span>{c.level}</span>
-                </div>
-                <h3 className="mt-3 line-clamp-2 text-lg font-semibold text-slate-900">{c.title}</h3>
-                <div className="mt-4 flex items-center justify-between">
-                  <button className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm text-white hover:bg-indigo-500">Học ngay</button>
-                  <a className="text-sm text-slate-600 hover:text-slate-900" href="#">Chi tiết</a>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
-}
+// CourseGrid đã được loại bỏ khỏi trang chủ theo yêu cầu
 
 function Footer() {
   return (
@@ -181,7 +142,6 @@ function LandingPage() {
     <div className="min-h-screen bg-white text-slate-800">
       <Navbar />
       <Hero />
-      <CourseGrid />
       <Footer />
     </div>
   );
@@ -192,6 +152,10 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/courses/add" element={<AddCourse />} />
+        <Route path="/courses/:id" element={<CourseDetail />} />
+        <Route path="/courses/:id/edit" element={<EditCourse />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
