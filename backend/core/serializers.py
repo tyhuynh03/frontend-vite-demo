@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import User
+from .models import User, Course
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,5 +39,21 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(required=True, write_only=True)
 
 
-
-
+class CourseSerializer(serializers.ModelSerializer):
+    created_by_username = serializers.CharField(source='created_by.username', read_only=True)
+    
+    class Meta:
+        model = Course
+        fields = ('id', 'title', 'level', 'category', 'description', 'content', 'created_by', 'created_by_username', 'created_at', 'updated_at', 'is_active')
+        read_only_fields = ('id', 'created_at', 'updated_at', 'created_by')
+    
+    def create(self, validated_data):
+        # Tự động set created_by từ user hiện tại
+        validated_data['created_by'] = self.context['request'].user
+        return Course.objects.create(**validated_data)
+    
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance

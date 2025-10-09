@@ -5,6 +5,7 @@
 - Python 3.8+
 - Node.js 18+
 - PostgreSQL 12+
+- Excel files để import dữ liệu khóa học (optional)
 
 ## ⚡ Quick Start
 
@@ -12,7 +13,7 @@
 
 ```bash
 # Tạo database
-psql -U postgres
+& "đường dẫn chứa psql.exe" -U postgres
 CREATE DATABASE mooc_db;
 \q
 ```
@@ -52,6 +53,9 @@ python manage.py createsuperuser
 
 # Chạy server
 python manage.py runserver
+
+# Import dữ liệu khóa học từ Excel
+python import_courses_excel.py
 ```
 
 ✅ Backend: http://localhost:8000
@@ -74,14 +78,23 @@ npm run dev
 
 ### Test trên Website
 
-1. Mở http://localhost:5173
-2. Click "Đăng ký ngay"
-3. Điền form:
-   - Họ tên: Test User
-   - Email: test@example.com
-   - Password: test123456
-4. Click "Đăng ký" → Redirect về trang chủ ✅
-5. Test login với email/password vừa tạo
+1. **Trang chủ**: Mở http://localhost:5173
+   - Trang chủ, Tin tức, Khóa học, Chương trình học, Giảng viên
+
+2. **Authentication**:
+   - Click "Đăng ký ngay"
+   - Điền form:
+     - Họ tên: Test User
+     - Email: test@example.com
+     - Password: test123456
+   - Click "Đăng ký" → Redirect về trang chủ ✅
+   - Test login với email/password vừa tạo
+
+3. **Khóa học**:
+   - Click "Khóa học" trong Navbar
+   - Kiểm tra danh sách khóa học với search và filter
+   - Click "Chi tiết" trên một khóa học
+   - Kiểm tra trang chi tiết với tabs: Giới thiệu, Nội dung khóa học, Giảng viên, Chương trình đào tạo
 
 
 ### Test trong Browser Console (F12)
@@ -108,6 +121,18 @@ fetch('http://localhost:8000/api/auth/login/', {
     password: 'test123456'
   })
 }).then(r => r.json()).then(console.log)
+
+// Get courses
+fetch('http://localhost:8000/api/auth/courses/')
+  .then(r => r.json()).then(console.log)
+
+// Get course by ID
+fetch('http://localhost:8000/api/auth/courses/1/')
+  .then(r => r.json()).then(console.log)
+
+// Filter courses by level
+fetch('http://localhost:8000/api/auth/courses/?level=THCS')
+  .then(r => r.json()).then(console.log)
 ```
 
 ## 🔍 Kiểm Tra
@@ -115,7 +140,18 @@ fetch('http://localhost:8000/api/auth/login/', {
 ### Database
 ```bash
 psql -U postgres -d mooc_db
+
+# Check users table
 SELECT * FROM users;
+
+# Check courses table
+SELECT * FROM courses;
+
+# Check course categories
+SELECT DISTINCT category FROM courses;
+
+# Check course levels
+SELECT DISTINCT level FROM courses;
 ```
 
 ### Django Admin
@@ -169,6 +205,7 @@ python manage.py runserver 8001
 
 ## 📚 API Endpoints
 
+### Authentication
 | Method | URL | Auth | Description |
 |--------|-----|------|-------------|
 | POST | `/api/auth/register/` | No | Đăng ký |
@@ -176,6 +213,19 @@ python manage.py runserver 8001
 | POST | `/api/auth/logout/` | Yes | Đăng xuất |
 | GET | `/api/auth/profile/` | Yes | Lấy thông tin user |
 | POST | `/api/auth/token/refresh/` | No | Refresh token |
+
+### Course Management
+| Method | URL | Auth | Description |
+|--------|-----|------|-------------|
+| GET | `/api/auth/courses/` | No | Danh sách khóa học |
+| POST | `/api/auth/courses/` | Yes | Tạo khóa học mới |
+| GET | `/api/auth/courses/{id}/` | No | Chi tiết khóa học |
+| PUT | `/api/auth/courses/{id}/` | Yes | Cập nhật khóa học |
+| DELETE | `/api/auth/courses/{id}/` | Yes | Xóa khóa học |
+
+### Course Filtering
+- `?level={level}` - Lọc theo cấp độ
+- `?category={category}` - Lọc theo chuyên mục
 
 ## 🗄️ Database Schema
 
@@ -187,20 +237,35 @@ python manage.py runserver 8001
 - `role` - student/teacher/admin
 - `created_at`, `updated_at` - Timestamps
 
+### Course Model
+- `id` - Primary Key
+- `title` - Tên khóa học
+- `level` - Cấp độ (free-form text)
+- `category` - Chuyên mục
+- `description` - Mô tả khóa học
+- `content` - Nội dung chi tiết
+- `is_active` - Trạng thái (soft delete)
+- `created_at`, `updated_at` - Timestamps
+
 ## 📝 Lưu Ý
 
 - Password được hash tự động bằng Django
 - JWT tokens: Access (1h), Refresh (7d)
 - CORS đã config cho localhost:5173
-- Database mặc định: PostgreSQL (có thể dùng SQLite bằng cách set `DATABASE_ENGINE=sqlite` trong .env)
+- Database mặc định: PostgreSQL
+- Course deletion là soft delete (is_active = False)
+- Excel import script hỗ trợ mapping level values
+- Frontend routing: `/courses` cho danh sách, `/courses/:id` cho chi tiết
 
 ## 🎯 Tech Stack
 
 **Backend:**
 - Django 4.2
 - Django REST Framework
-- JWT Authentication
+- JWT Authentication (SimpleJWT)
 - PostgreSQL
+- OpenPyXL (Excel import/export)
+- CORS Headers
 
 **Frontend:**
 - React 19
@@ -208,4 +273,5 @@ python manage.py runserver 8001
 - Vite
 - TailwindCSS
 - Axios
+- React Router DOM
 

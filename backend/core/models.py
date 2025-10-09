@@ -49,5 +49,22 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-
-
+class Course(models.Model):
+    title = models.CharField(verbose_name="Tên khóa học")
+    level = models.CharField(verbose_name="Cấp độ")
+    category = models.CharField(verbose_name="Chuyên mục")
+    description = models.TextField(verbose_name="Mô tả")
+    content = models.TextField(verbose_name="Nội dung khóa học", default="")
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Người tạo", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True, verbose_name="Trạng thái hoạt động")
+    
+    class Meta:
+        db_table = 'courses'
+        verbose_name = 'Khóa học'
+        verbose_name_plural = 'Khóa học'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.title
