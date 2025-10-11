@@ -1,4 +1,4 @@
-import { User, AuthTokens } from '../types/user';
+import type { User, AuthTokens } from '../types/user';
 
 export const saveAuth = (user: User, tokens: AuthTokens) => {
   localStorage.setItem('user', JSON.stringify(user));

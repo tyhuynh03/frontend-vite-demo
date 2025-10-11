@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import UserMenu from './UserMenu';
+import type { CourseFormData } from '../types/course';
 
 function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -51,22 +52,17 @@ function Navbar() {
   )
 }
 
-interface CourseFormData {
-  title: string;
-  level: string;
-  category: string;
-  description: string;
-  content: string;
-}
-
 function EditCourse() {
   const { id } = useParams<{ id: string }>();
   const [formData, setFormData] = useState<CourseFormData>({
     title: '',
-    level: '',
-    category: '',
-    description: '',
-    content: ''
+    introduction: '',
+    requirements: '',
+    objectives: '',
+    content: '',
+    exercises: '',
+    progress_schedule: '',
+    notes: ''
   });
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
@@ -105,17 +101,20 @@ function EditCourse() {
         const courseData = await response.json();
         
         // Kiểm tra user có phải là người tạo khóa học không
-        if (user && courseData.created_by !== user.id && user.role !== 'admin') {
+        if (user && courseData.created_by !== null && courseData.created_by !== user.id && user.role !== 'admin') {
           navigate('/courses');
           return;
         }
         
         setFormData({
           title: courseData.title,
-          level: courseData.level,
-          category: courseData.category,
-          description: courseData.description,
-          content: courseData.content
+          introduction: courseData.introduction || '',
+          requirements: courseData.requirements || '',
+          objectives: courseData.objectives || '',
+          content: courseData.content || '',
+          exercises: courseData.exercises || '',
+          progress_schedule: courseData.progress_schedule || '',
+          notes: courseData.notes || ''
         });
       } else {
         setError('Không tìm thấy khóa học');
@@ -148,16 +147,12 @@ function EditCourse() {
       setError('Vui lòng nhập tên khóa học');
       return;
     }
-    if (!formData.level.trim()) {
-      setError('Vui lòng nhập cấp độ');
+    if (!formData.introduction.trim()) {
+      setError('Vui lòng nhập giới thiệu sơ lược');
       return;
     }
-    if (!formData.category.trim()) {
-      setError('Vui lòng nhập chuyên mục');
-      return;
-    }
-    if (!formData.description.trim()) {
-      setError('Vui lòng nhập mô tả khóa học');
+    if (!formData.content.trim()) {
+      setError('Vui lòng nhập nội dung khóa học');
       return;
     }
 
@@ -250,79 +245,81 @@ function EditCourse() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Info */}
           <div className="bg-white border border-slate-200 rounded-lg p-6">
             <h2 className="text-lg font-semibold text-slate-900 mb-4">Thông tin cơ bản</h2>
             
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {/* Title */}
-              <div className="md:col-span-2">
-                <label htmlFor="title" className="block text-sm font-medium text-slate-700 mb-2">
-                  Tên khóa học *
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  placeholder="Nhập tên khóa học"
-                  required
-                />
-              </div>
-
-              {/* Level */}
-              <div>
-                <label htmlFor="level" className="block text-sm font-medium text-slate-700 mb-2">
-                  Cấp độ *
-                </label>
-                <input
-                  type="text"
-                  id="level"
-                  name="level"
-                  value={formData.level}
-                  onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  placeholder="Ví dụ: THCS, Đại học, Tất cả đối tượng..."
-                  required
-                />
-              </div>
-
-              {/* Category */}
-              <div>
-                <label htmlFor="category" className="block text-sm font-medium text-slate-700 mb-2">
-                  Chuyên mục *
-                </label>
-                <input
-                  type="text"
-                  id="category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  placeholder="Ví dụ: Sáng tạo nội dung, Công nghệ thông tin..."
-                  required
-                />
-              </div>
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-slate-700 mb-2">
+                Tên khóa học *
+              </label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                placeholder="Nhập tên khóa học"
+                required
+              />
             </div>
           </div>
 
-          {/* Description */}
+          {/* Introduction */}
           <div className="bg-white border border-slate-200 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Mô tả khóa học</h2>
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">Giới thiệu sơ lược</h2>
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-2">
-                Mô tả ngắn gọn về khóa học *
+              <label htmlFor="introduction" className="block text-sm font-medium text-slate-700 mb-2">
+                Giới thiệu về khóa học *
               </label>
               <textarea
-                id="description"
-                name="description"
-                value={formData.description}
+                id="introduction"
+                name="introduction"
+                value={formData.introduction}
                 onChange={handleInputChange}
                 rows={4}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="Mô tả ngắn gọn về nội dung, mục tiêu của khóa học..."
+                placeholder="Giới thiệu tổng quan về khóa học..."
                 required
+              />
+            </div>
+          </div>
+
+          {/* Requirements */}
+          <div className="bg-white border border-slate-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">Yêu cầu đầu vào</h2>
+            <div>
+              <label htmlFor="requirements" className="block text-sm font-medium text-slate-700 mb-2">
+                Yêu cầu kiến thức và kỹ năng
+              </label>
+              <textarea
+                id="requirements"
+                name="requirements"
+                value={formData.requirements}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                placeholder="Kiến thức nền tảng, kỹ năng cần có trước khi tham gia..."
+              />
+            </div>
+          </div>
+
+          {/* Objectives */}
+          <div className="bg-white border border-slate-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">Mục tiêu khóa học</h2>
+            <div>
+              <label htmlFor="objectives" className="block text-sm font-medium text-slate-700 mb-2">
+                Mục tiêu học tập
+              </label>
+              <textarea
+                id="objectives"
+                name="objectives"
+                value={formData.objectives}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                placeholder="Những gì học viên sẽ đạt được sau khóa học..."
               />
             </div>
           </div>
@@ -332,7 +329,7 @@ function EditCourse() {
             <h2 className="text-lg font-semibold text-slate-900 mb-4">Nội dung khóa học</h2>
             <div>
               <label htmlFor="content" className="block text-sm font-medium text-slate-700 mb-2">
-                Nội dung chi tiết
+                Nội dung chi tiết *
               </label>
               <textarea
                 id="content"
@@ -341,7 +338,65 @@ function EditCourse() {
                 onChange={handleInputChange}
                 rows={8}
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                placeholder="Mô tả chi tiết nội dung khóa học, chương trình học, yêu cầu học viên..."
+                placeholder="Mô tả chi tiết nội dung khóa học, chương trình học..."
+                required
+              />
+            </div>
+          </div>
+
+          {/* Exercises */}
+          <div className="bg-white border border-slate-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">Bài tập</h2>
+            <div>
+              <label htmlFor="exercises" className="block text-sm font-medium text-slate-700 mb-2">
+                Bài tập thực hành
+              </label>
+              <textarea
+                id="exercises"
+                name="exercises"
+                value={formData.exercises}
+                onChange={handleInputChange}
+                rows={6}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                placeholder="Các bài tập, dự án thực hành trong khóa học..."
+              />
+            </div>
+          </div>
+
+          {/* Progress Schedule */}
+          <div className="bg-white border border-slate-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">Tiến độ đề xuất</h2>
+            <div>
+              <label htmlFor="progress_schedule" className="block text-sm font-medium text-slate-700 mb-2">
+                Lịch trình học tập đề xuất
+              </label>
+              <textarea
+                id="progress_schedule"
+                name="progress_schedule"
+                value={formData.progress_schedule}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                placeholder="Thời gian học tập, lịch trình đề xuất..."
+              />
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div className="bg-white border border-slate-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">Lưu ý, ghi chú</h2>
+            <div>
+              <label htmlFor="notes" className="block text-sm font-medium text-slate-700 mb-2">
+                Lưu ý quan trọng
+              </label>
+              <textarea
+                id="notes"
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                placeholder="Các lưu ý, ghi chú quan trọng cho học viên..."
               />
             </div>
           </div>

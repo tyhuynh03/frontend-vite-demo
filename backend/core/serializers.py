@@ -40,11 +40,11 @@ class LoginSerializer(serializers.Serializer):
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    created_by_username = serializers.CharField(source='created_by.username', read_only=True)
+    created_by_username = serializers.CharField(source='created_by.username', read_only=True, allow_null=True)
     
     class Meta:
         model = Course
-        fields = ('id', 'title', 'level', 'category', 'description', 'content', 'created_by', 'created_by_username', 'created_at', 'updated_at', 'is_active')
+        fields = ('id', 'title', 'introduction', 'requirements', 'objectives', 'content', 'exercises', 'progress_schedule', 'notes', 'created_by', 'created_by_username', 'created_at', 'updated_at', 'is_active')
         read_only_fields = ('id', 'created_at', 'updated_at', 'created_by')
     
     def create(self, validated_data):

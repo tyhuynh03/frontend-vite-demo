@@ -40,7 +40,6 @@ function Navbar() {
           <Link to="/" className="hover:text-slate-900">Trang chủ</Link>
           <a className="hover:text-slate-900" href="#tin-tuc">Tin tức</a>
           <Link to="/courses" className="hover:text-slate-900">Khóa học</Link>
-          <a className="hover:text-slate-900" href="#chuong-trinh-hoc">Chương trình học</a>
           <a className="hover:text-slate-900" href="#giang-vien">Giảng viên</a>
         </nav>
         <div className="flex items-center gap-3">

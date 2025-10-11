@@ -1,17 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import UserMenu from './UserMenu';
-
-interface Course {
-  id: number;
-  title: string;
-  level: string;
-  category: string;
-  description: string;
-  content: string;
-  created_at: string;
-  is_active: boolean;
-}
+import type { Course } from '../types/course';
 
 function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -44,7 +34,6 @@ function Navbar() {
           <Link to="/" className="hover:text-slate-900">Trang chủ</Link>
           <a className="hover:text-slate-900" href="#tin-tuc">Tin tức</a>
           <Link to="/courses" className="hover:text-slate-900">Khóa học</Link>
-          <a className="hover:text-slate-900" href="#chuong-trinh-hoc">Chương trình học</a>
           <a className="hover:text-slate-900" href="#giang-vien">Giảng viên</a>
         </nav>
         <div className="flex items-center gap-3">
@@ -63,55 +52,20 @@ function Navbar() {
 }
 
 function CourseCard({ course }: { course: Course }) {
-  const getCategoryColor = (category: string) => {
-    const colors: { [key: string]: string } = {
-      'Sáng tạo nội dung': 'bg-purple-100 text-purple-700',
-      'Lập trình': 'bg-blue-100 text-blue-700',
-      'Trí tuệ nhân tạo': 'bg-green-100 text-green-700',
-      'Phát triển web': 'bg-orange-100 text-orange-700',
-      'Phân tích dữ liệu': 'bg-yellow-100 text-yellow-700',
-      'Bảo mật': 'bg-red-100 text-red-700',
-      'Lập trình game': 'bg-pink-100 text-pink-700',
-    };
-    return colors[category] || 'bg-gray-100 text-gray-700';
-  };
-
-  const getLevelColor = (level: string) => {
-    // Tự động tạo màu dựa trên hash của level
-    const hash = level.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-    const colors = [
-      'bg-blue-50 text-blue-600',
-      'bg-green-50 text-green-600', 
-      'bg-purple-50 text-purple-600',
-      'bg-orange-50 text-orange-600',
-      'bg-red-50 text-red-600',
-      'bg-indigo-50 text-indigo-600',
-      'bg-pink-50 text-pink-600',
-      'bg-yellow-50 text-yellow-600',
-    ];
-    return colors[Math.abs(hash) % colors.length];
-  };
-
   return (
     <article className="overflow-hidden rounded-xl border transition hover:shadow-md bg-white">
       <div className="h-48 w-full overflow-hidden bg-gradient-to-br from-indigo-100 to-purple-100">
         {/* Placeholder cho ảnh khóa học - sẽ được thêm sau */}
       </div>
       <div className="p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <span className={`rounded-full px-2 py-1 text-xs font-medium ${getCategoryColor(course.category)}`}>
-            {course.category}
-          </span>
-          <span className={`rounded-full px-2 py-1 text-xs font-medium ${getLevelColor(course.level)}`}>
-            {course.level}
-          </span>
-        </div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-4 line-clamp-2">
+        <h3 className="text-lg font-semibold text-slate-900 mb-3 line-clamp-2">
           {course.title}
         </h3>
+        {course.introduction && (
+          <p className="text-sm text-slate-600 mb-4 line-clamp-3">
+            {course.introduction}
+          </p>
+        )}
         <div className="flex items-center justify-between">
           <Link 
             to={`/courses/${course.id}`}
@@ -129,8 +83,6 @@ function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedLevel, setSelectedLevel] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
   const [user, setUser] = useState<any>(null);
   const location = useLocation();
 
@@ -149,20 +101,12 @@ function CoursesPage() {
     }
     
     fetchCourses();
-  }, [selectedLevel, selectedCategory, location.search]);
+  }, [location.search]);
 
   const fetchCourses = async () => {
     try {
       setLoading(true);
-      let url = 'http://localhost:8000/api/auth/courses/';
-      const params = new URLSearchParams();
-      
-      if (selectedLevel) params.append('level', selectedLevel);
-      if (selectedCategory) params.append('category', selectedCategory);
-      
-      if (params.toString()) {
-        url += `?${params.toString()}`;
-      }
+      const url = 'http://localhost:8000/api/auth/courses/';
 
       const response = await fetch(url);
       if (response.ok) {
@@ -178,12 +122,9 @@ function CoursesPage() {
 
   const filteredCourses = courses.filter(course =>
     course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    course.category.toLowerCase().includes(searchTerm.toLowerCase())
+    course.introduction.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const categories = Array.from(new Set(courses.map(course => course.category)));
-  const levels = Array.from(new Set(courses.map(course => course.level)));
 
   return (
     <div className="min-h-screen bg-white text-slate-800">
@@ -231,7 +172,7 @@ function CoursesPage() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Tìm kiếm khóa học, chuyên mục"
+                  placeholder="Tìm kiếm khóa học"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full px-4 py-3 pr-12 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -245,42 +186,6 @@ function CoursesPage() {
             </div>
           </div>
 
-          {/* Filters */}
-          <div className="mt-6 flex flex-wrap gap-3">
-            <select
-              value={selectedLevel}
-              onChange={(e) => setSelectedLevel(e.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            >
-              <option value="">Tất cả cấp độ</option>
-              {levels.map(level => (
-                <option key={level} value={level}>{level}</option>
-              ))}
-            </select>
-            
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            >
-              <option value="">Tất cả chuyên mục</option>
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-            
-            {(selectedLevel || selectedCategory) && (
-              <button
-                onClick={() => {
-                  setSelectedLevel('');
-                  setSelectedCategory('');
-                }}
-                className="px-3 py-2 text-sm text-indigo-600 hover:text-indigo-500"
-              >
-                Xóa bộ lọc
-              </button>
-            )}
-          </div>
         </div>
       </div>
 

@@ -1,19 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import UserMenu from './UserMenu';
-
-interface Course {
-  id: number;
-  title: string;
-  level: string;
-  category: string;
-  description: string;
-  content: string;
-  created_by: number;
-  created_by_username: string;
-  created_at: string;
-  is_active: boolean;
-}
+import type { Course } from '../types/course';
 
 function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -46,7 +34,6 @@ function Navbar() {
           <Link to="/" className="hover:text-slate-900">Trang chủ</Link>
           <a className="hover:text-slate-900" href="#tin-tuc">Tin tức</a>
           <Link to="/courses" className="hover:text-slate-900">Khóa học</Link>
-          <a className="hover:text-slate-900" href="#chuong-trinh-hoc">Chương trình học</a>
           <a className="hover:text-slate-900" href="#giang-vien">Giảng viên</a>
         </nav>
         <div className="flex items-center gap-3">
@@ -125,41 +112,14 @@ function CourseDetailPage() {
 
   const tabs = [
     { id: 'gioi-thieu', label: 'Giới thiệu' },
+    { id: 'yeu-cau', label: 'Yêu cầu đầu vào' },
+    { id: 'muc-tieu', label: 'Mục tiêu khóa học' },
     { id: 'noi-dung', label: 'Nội dung khóa học' },
-    { id: 'giang-vien', label: 'Giảng viên' },
-    { id: 'chuong-trinh', label: 'Chương trình đào tạo' },
+    { id: 'bai-tap', label: 'Bài tập' },
+    { id: 'tien-do', label: 'Tiến độ đề xuất' },
+    { id: 'luu-y', label: 'Lưu ý, ghi chú' },
   ];
 
-  const getCategoryColor = (category: string) => {
-    const colors: { [key: string]: string } = {
-      'Sáng tạo nội dung': 'bg-purple-100 text-purple-700',
-      'Lập trình': 'bg-blue-100 text-blue-700',
-      'Trí tuệ nhân tạo': 'bg-green-100 text-green-700',
-      'Phát triển web': 'bg-orange-100 text-orange-700',
-      'Phân tích dữ liệu': 'bg-yellow-100 text-yellow-700',
-      'Bảo mật': 'bg-red-100 text-red-700',
-      'Lập trình game': 'bg-pink-100 text-pink-700',
-    };
-    return colors[category] || 'bg-gray-100 text-gray-700';
-  };
-
-  const getLevelColor = (level: string) => {
-    const hash = level.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
-      return a & a;
-    }, 0);
-    const colors = [
-      'bg-blue-50 text-blue-600',
-      'bg-green-50 text-green-600', 
-      'bg-purple-50 text-purple-600',
-      'bg-orange-50 text-orange-600',
-      'bg-red-50 text-red-600',
-      'bg-indigo-50 text-indigo-600',
-      'bg-pink-50 text-pink-600',
-      'bg-yellow-50 text-yellow-600',
-    ];
-    return colors[Math.abs(hash) % colors.length];
-  };
 
   if (loading) {
     return (
@@ -210,25 +170,17 @@ function CourseDetailPage() {
       <div className="bg-gradient-to-b from-white to-slate-50 text-slate-800 border-b">
         <div className="mx-auto max-w-7xl px-4 py-12">
           <div className="flex flex-col">
-            {/* Course Tags */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              <span className={`rounded-full px-3 py-1 text-xs font-medium ${getCategoryColor(course.category)}`}>
-                {course.category}
-              </span>
-              <span className={`rounded-full px-3 py-1 text-xs font-medium ${getLevelColor(course.level)}`}>
-                {course.level}
-              </span>
-            </div>
-            
             {/* Course Title */}
             <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight text-slate-900">
               {course.title}
             </h1>
             
-            {/* Course Description */}
-            <p className="text-lg text-slate-600 mb-6 leading-relaxed">
-              {course.description}
-            </p>
+            {/* Course Introduction */}
+            {course.introduction && (
+              <p className="text-lg text-slate-600 mb-6 leading-relaxed">
+                {course.introduction}
+              </p>
+            )}
             
             {/* Action Buttons */}
             <div className="flex items-center gap-4">
@@ -237,7 +189,7 @@ function CourseDetailPage() {
               </button>
               
               {/* Edit/Delete buttons for course owner */}
-              {user && course && (user.id === course.created_by || user.role === 'admin') && (
+              {user && course && (course.created_by === null || user.id === course.created_by || user.role === 'admin') && (
                 <div className="flex items-center gap-2">
                   <Link
                     to={`/courses/${course.id}/edit`}
@@ -289,56 +241,110 @@ function CourseDetailPage() {
       {/* Content Section */}
       <div className="mx-auto max-w-7xl px-4 py-8">
         {activeTab === 'gioi-thieu' && (
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Giới thiệu về khóa học</h2>
-            <div className="prose prose-slate max-w-none">
-              <p className="text-slate-700 leading-relaxed">
-                {course.description}
-              </p>
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Giới thiệu về khóa học</h2>
+              <div className="prose prose-slate max-w-none">
+                <div className="bg-slate-50 rounded-lg p-6">
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+                    {course.introduction}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'yeu-cau' && (
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Yêu cầu đầu vào</h2>
+              <div className="prose prose-slate max-w-none">
+                <div className="bg-blue-50 rounded-lg p-6">
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+                    {course.requirements || 'Chưa có thông tin về yêu cầu đầu vào.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'muc-tieu' && (
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Mục tiêu khóa học</h2>
+              <div className="prose prose-slate max-w-none">
+                <div className="bg-green-50 rounded-lg p-6">
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+                    {course.objectives || 'Chưa có thông tin về mục tiêu khóa học.'}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
         {activeTab === 'noi-dung' && (
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Nội dung khóa học</h2>
-            <div className="prose prose-slate max-w-none">
-              <div className="bg-slate-50 rounded-lg p-6">
-                <p className="text-slate-700 leading-relaxed whitespace-pre-line">
-                  {course.content}
-                </p>
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Nội dung khóa học</h2>
+              <div className="prose prose-slate max-w-none">
+                <div className="bg-slate-50 rounded-lg p-6">
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+                    {course.content || 'Chưa có thông tin về nội dung khóa học.'}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {activeTab === 'giang-vien' && (
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Giảng viên</h2>
-            <div className="text-center py-12">
-              <div className="text-slate-400 mb-4">
-                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
+        {activeTab === 'bai-tap' && (
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Bài tập</h2>
+              <div className="prose prose-slate max-w-none">
+                <div className="bg-purple-50 rounded-lg p-6">
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+                    {course.exercises || 'Chưa có thông tin về bài tập.'}
+                  </p>
+                </div>
               </div>
-              <p className="text-slate-500">Thông tin giảng viên sẽ được cập nhật sớm</p>
             </div>
           </div>
         )}
 
-        {activeTab === 'chuong-trinh' && (
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-6">Chương trình đào tạo</h2>
-            <div className="text-center py-12">
-              <div className="text-slate-400 mb-4">
-                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+        {activeTab === 'tien-do' && (
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Tiến độ đề xuất</h2>
+              <div className="prose prose-slate max-w-none">
+                <div className="bg-indigo-50 rounded-lg p-6">
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+                    {course.progress_schedule || 'Chưa có thông tin về tiến độ đề xuất.'}
+                  </p>
+                </div>
               </div>
-              <p className="text-slate-500">Chương trình đào tạo sẽ được cập nhật sớm</p>
             </div>
           </div>
         )}
+
+        {activeTab === 'luu-y' && (
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 mb-6">Lưu ý, ghi chú</h2>
+              <div className="prose prose-slate max-w-none">
+                <div className="bg-yellow-50 rounded-lg p-6">
+                  <p className="text-slate-700 leading-relaxed whitespace-pre-line">
+                    {course.notes || 'Chưa có lưu ý hoặc ghi chú nào.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* Delete Confirmation Modal */}

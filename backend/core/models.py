@@ -51,10 +51,14 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Course(models.Model):
     title = models.CharField(verbose_name="Tên khóa học")
-    level = models.CharField(verbose_name="Cấp độ")
-    category = models.CharField(verbose_name="Chuyên mục")
-    description = models.TextField(verbose_name="Mô tả")
+    introduction = models.TextField(verbose_name="Giới thiệu sơ lược", default="")
+    requirements = models.TextField(verbose_name="Yêu cầu đầu vào", default="")
+    objectives = models.TextField(verbose_name="Mục tiêu khóa học", default="")
     content = models.TextField(verbose_name="Nội dung khóa học", default="")
+    exercises = models.TextField(verbose_name="Bài tập", default="")
+    progress_schedule = models.TextField(verbose_name="Tiến độ đề xuất", default="")
+    notes = models.TextField(verbose_name="Lưu ý, ghi chú", default="")
+    
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Người tạo", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

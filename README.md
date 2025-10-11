@@ -17,24 +17,25 @@ Dự án học tập trực tuyến với cấu trúc monorepo gồm frontend v�
 
 ### 📚 Course Management
 - CRUD Operations cho khóa học
-- Course Categories & Levels
 - Course Search & Filtering
-- Course Detail Pages với Tab Navigation
-- Excel Import/Export cho dữ liệu khóa học
+- Course Detail Pages với Tab Navigation (7 tabs chi tiết)
+- Markdown Import cho dữ liệu khóa học
+- Role-based Course Creation (Teachers can create courses)
 
 ### 🎨 User Interface
 - Modern Responsive UI với TailwindCSS
 - Course Grid Layout
-- Tab Navigation (Giới thiệu, Nội dung, Giảng viên, Chương trình)
-- Breadcrumb Navigation
+- Tab Navigation (Giới thiệu, Yêu cầu đầu vào, Mục tiêu, Nội dung, Bài tập, Tiến độ, Lưu ý)
+- Search Functionality
 - Loading States & Error Handling
 
 ### 🔧 Backend Features
 - RESTful API với Django REST Framework
 - PostgreSQL Database
-- Excel Data Import (OpenPyXL)
+- Markdown Data Import với content cleaning
 - Admin Panel
 - CORS Configuration
+- Role-based Permissions
 
 ## Quick Start
 
@@ -46,7 +47,8 @@ venv\Scripts\activate
 pip install -r requirements.txt
 python manage.py makemigrations 
 python manage.py migrate
-python import_courses_excel.py
+python create_admin_user.py
+python import_markdown_courses.py
 python manage.py runserver
 ```
 
@@ -65,7 +67,10 @@ npm run dev
 frontend-vite-demo/
 ├── backend/
 │   ├── config/          # Django settings
-│   ├── core/        # User app
+│   ├── core/            # User & Course models
+│   ├── khoa_hoc/        # Markdown course files
+│   ├── import_markdown_courses.py
+│   ├── create_admin_user.py
 │   └── manage.py
 ├── frontend/
 │   └── src/
@@ -98,8 +103,7 @@ frontend-vite-demo/
 | DELETE | `/api/auth/courses/{id}/` | Xóa khóa học (soft delete) | Yes |
 
 ### Query Parameters cho Course List
-- `?level={level}` - Lọc theo cấp độ
-- `?category={category}` - Lọc theo chuyên mục
+- `?search={keyword}` - Tìm kiếm theo từ khóa (title, introduction, content)
 
 ## Database Schema
 
@@ -114,10 +118,14 @@ frontend-vite-demo/
 ### Course Model
 - `id` - Primary Key
 - `title` - Tên khóa học
-- `level` - Cấp độ (free-form text)
-- `category` - Chuyên mục
-- `description` - Mô tả khóa học
-- `content` - Nội dung chi tiết
+- `introduction` - Giới thiệu sơ lược
+- `requirements` - Yêu cầu đầu vào
+- `objectives` - Mục tiêu khóa học
+- `content` - Nội dung khóa học
+- `exercises` - Bài tập
+- `progress_schedule` - Tiến độ đề xuất
+- `notes` - Lưu ý, ghi chú
+- `created_by` - Người tạo (ForeignKey to User, nullable)
 - `is_active` - Trạng thái (soft delete)
 - `created_at`, `updated_at` - Timestamps
 
@@ -128,8 +136,10 @@ frontend-vite-demo/
 python manage.py runserver              # Start server
 python manage.py makemigrations         # Create migrations
 python manage.py migrate                # Run migrations
-python manage.py createsuperuser        # Create admin user
-python import_courses_excel.py          # Import courses from Excel
+python manage.py createsuperuser        # Create superuser
+python create_admin_user.py             # Create admin user
+python import_markdown_courses.py       # Import courses from markdown
+python clear_courses_data.py            # Clear course data
 ```
 
 **Frontend:**
@@ -163,11 +173,58 @@ curl -X GET http://localhost:8000/api/auth/courses/
 # Get course by ID
 curl -X GET http://localhost:8000/api/auth/courses/1/
 
-# Filter courses by level
-curl -X GET http://localhost:8000/api/auth/courses/?level=THCS
+# Search courses by keyword
+curl -X GET "http://localhost:8000/api/auth/courses/?search=AI"
+```
 
-# Filter courses by category
-curl -X GET http://localhost:8000/api/auth/courses/?category=Sáng+tạo+nội+dung
+## 📝 Markdown Import
+
+### Cấu trúc file Markdown
+Các file khóa học trong thư mục `backend/khoa_hoc/` phải có cấu trúc:
+
+```markdown
+# Tên khóa học
+
+## 1. Giới thiệu sơ lược
+Nội dung giới thiệu...
+
+## 2. Yêu cầu đầu vào
+Yêu cầu cần thiết...
+
+## 3. Mục tiêu khóa học
+Mục tiêu học tập...
+
+## 4. Nội dung khóa học
+Nội dung chi tiết...
+
+## 5. Bài tập
+Các bài tập thực hành...
+
+## 6. Tiến độ đề xuất
+Lịch trình học tập...
+
+## 7. Lưu ý, ghi chú
+Các lưu ý quan trọng...
+```
+
+### Content Cleaning
+Script import tự động làm sạch:
+- ✅ Bỏ định dạng **bold**, *italic*
+- ✅ Bỏ links, headers, list markers
+- ✅ Bỏ emoji và icon
+- ✅ Giữ nguyên dấu tiếng Việt
+- ✅ Làm sạch khoảng trắng thừa
+
+### Import Commands
+```bash
+# Tạo admin user (nếu chưa có)
+python create_admin_user.py
+
+# Import tất cả khóa học từ markdown
+python import_markdown_courses.py
+
+# Xóa dữ liệu khóa học (nếu cần)
+python clear_courses_data.py
 ```
 
 ## License
